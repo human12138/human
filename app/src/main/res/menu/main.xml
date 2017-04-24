@@ -8,4 +8,7 @@
     <item
         android:id="@+id/del_item"
         android:title="删除"/>
+    <item
+        android:id="@+id/clc_item"
+        android:title="清空"/>
 </menu>

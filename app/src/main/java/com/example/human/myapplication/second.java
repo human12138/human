@@ -1,14 +1,25 @@
 package com.example.human.myapplication;
 
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.icu.util.Calendar;
+import android.net.Uri;
+import android.os.Build;
 import android.os.PersistableBundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,15 +33,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.litepal.crud.DataSupport;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -46,6 +60,9 @@ public class second extends AppCompatActivity {
     private EditText edit;
     private int flag;
     private String name;
+    private static final int take = 1;
+    private ImageView picture;
+    private Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,10 +156,77 @@ public class second extends AppCompatActivity {
                 Intent intent1 = new Intent(second.this,MainActivity.class);
                 startActivity(intent1);
                 break;
+            case R.id.take:
+                picture = (ImageView) findViewById(R.id.picture);
+                File outputImage = new File(getExternalCacheDir(),"output_image.jpg");
+                if(outputImage.exists()){
+                    outputImage.delete();
+                }
+                try {
+                    outputImage.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if(Build.VERSION.SDK_INT>=24){
+                    imageUri = FileProvider.getUriForFile(second.this,"com.example.human.myapplication.fileprovider",outputImage);
+                }
+                else{
+                    imageUri = Uri.fromFile(outputImage);
+                }
+
+                if(ContextCompat.checkSelfPermission(second.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(second.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+                }
+                else{
+                    take_photo();
+                }
+                break;
             default:
         }
         return true;
     }
+
+    private void take_photo(){
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+        startActivityForResult(intent,take);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case 1:
+                if(grantResults.length>0 && grantResults[0]== PackageManager.PERMISSION_DENIED){
+                    take_photo();
+                }
+                else {
+                    Toast.makeText(this,"无法使用相机",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case take:
+                if(resultCode==RESULT_OK){
+                    Bitmap bitmap = null;
+                    try {
+                        bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageUri));
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    picture.setImageBitmap(bitmap);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     //保存文本信息
     public void save(){
 

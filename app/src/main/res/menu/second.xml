@@ -7,4 +7,10 @@
     <item
         android:id="@+id/throw_item"
         android:title="丢弃"/>
+    <item
+        android:id="@+id/take"
+        android:title="拍照"/>
+    <item
+        android:id="@+id/find"
+        android:title="图库"/>
 </menu>

@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
                 if(resultCode == RESULT_OK){
                     String string = data.getStringExtra("data_return");
                     if(string.equals("yes")) {
-                        Log.d("MainActivity",adapter.list.size()+"");
                         for (int i = 0; i < adapter.list.size(); i++) {
                             summary s = summaryList.get(adapter.list.get(i));
                             String name = s.getDate();
@@ -75,6 +74,18 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
+                }
+            case 2:
+                if(resultCode==RESULT_OK){
+                    String string = data.getStringExtra("data_return");
+                    if(string.equals("yes")){
+                        for(int i = 0;i<summaryList.size();i++){
+                            summary s = summaryList.get(i);
+                            String name = s.getDate();
+                            deleteFile(name);
+                            DataSupport.deleteAll(memory.class,"name = ?",name);
+                        }
+                    }
                 }
         }
     }
@@ -97,6 +108,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.del_item:
                 Intent intent1=new Intent(MainActivity.this,DialogActivity.class);
                 startActivityForResult(intent1,1);
+                break;
+            case R.id.clc_item:
+                Intent intent2 = new Intent(MainActivity.this,DialogActivity.class);
+                startActivityForResult(intent2,2);
                 break;
             default:
         }
