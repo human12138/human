@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.human.myapplication">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
-    <uses-permission android:name="android.permission.CAMERA"></uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name="org.litepal.LitePalApplication"
@@ -22,11 +21,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".second" >
-            </activity>
-        <activity android:name=".DialogActivity"
-            android:theme="@style/Theme.AppCompat.Dialog">
-        </activity>
+        <activity android:name=".second"></activity>
+        <activity
+            android:name=".DialogActivity"
+            android:theme="@style/Theme.AppCompat.Dialog"></activity>
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.human.myapplication.fileprovider"
@@ -34,9 +33,13 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"
-                />
-            </provider>
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <activity
+            android:name=".DrawActivity"
+            android:theme="@style/Theme.AppCompat.Dialog"
+            android:label="画出你的想法"></activity>
     </application>
 
 </manifest>

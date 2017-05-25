@@ -1,16 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
 
     <item
         android:id="@+id/save_item"
-        android:title="保存" />
+        android:title="保存"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/throw_item"
-        android:title="丢弃"/>
+        android:title="放弃"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/take"
-        android:title="拍照"/>
+        android:title="拍照"
+        android:icon="@mipmap/photo"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/find"
-        android:title="图库"/>
+        android:title="图库"
+        android:icon="@mipmap/gal"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/share"
+        android:title="分享"
+        android:icon="@mipmap/share"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/draw"
+        android:title="画板"
+        app:showAsAction="ifRoom"
+        ></item>
+
 </menu>

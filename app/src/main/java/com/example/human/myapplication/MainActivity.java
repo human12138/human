@@ -3,7 +3,9 @@ package com.example.human.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,6 +43,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name=null;
+                Intent intent = new Intent(MainActivity.this,second.class);
+                intent.putExtra("extra_data",name);
+                startActivity(intent);
+            }
+        });
         summaryList.clear();
         initsummary();
         adapter = new madapter(MainActivity.this, R.layout.sum_item,summaryList);
@@ -73,10 +87,10 @@ public class MainActivity extends AppCompatActivity {
                             DataSupport.deleteAll(memory.class, "name = ?", name);
                         }
                     }
-
                 }
+                break;
             case 2:
-                if(resultCode==RESULT_OK){
+                if(resultCode == RESULT_OK){
                     String string = data.getStringExtra("data_return");
                     if(string.equals("yes")){
                         for(int i = 0;i<summaryList.size();i++){
@@ -120,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initsummary() {
         List<memory> ms= DataSupport.order("date desc").find(memory.class);
-
         for(memory m:ms){
             summary s = new summary(m.getDate(),m.getName());
             summaryList.add(s);

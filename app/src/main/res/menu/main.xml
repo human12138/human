@@ -4,11 +4,15 @@
 
     <item
         android:id="@+id/add_item"
-        android:title="新建" />
+        android:title="新建"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/del_item"
-        android:title="删除"/>
+        android:icon="@mipmap/del"
+        android:title="删除"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/clc_item"
-        android:title="清空"/>
+        android:title="清空"
+        app:showAsAction="ifRoom"/>
 </menu>

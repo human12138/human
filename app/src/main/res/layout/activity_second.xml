@@ -2,33 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.human.myapplication.second">
-<ScrollView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:actionBarSize"
+        android:background="@color/colorPrimaryDark"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/Theme.AppCompat.Light"></android.support.v7.widget.Toolbar>
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-
-    <EditText
-        android:id="@+id/editText2"
-        android:layout_width="wrap_content"
-        android:layout_height="540dp"
-        android:gravity="top"
-        android:hint="今天心情怎么样…"
-        android:maxLines="100"
-        android:textColor="#161616"
-        android:background = "@null"
-        tools:layout_editor_absoluteX="-5dp"
-        tools:layout_editor_absoluteY="0dp" />
-        <ImageView
-            android:id="@+id/picture"
+        <EditText
+            android:id="@+id/editText2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_height="540dp"
+            android:gravity="top"
+            android:hint="今天心情怎么样…"
+            android:maxLines="100"
+            android:textColor="#161616"
+            android:background = "@null"
+            tools:layout_editor_absoluteX="-5dp"
+         tools:layout_editor_absoluteY="0dp" />
     </LinearLayout>
     </ScrollView>
 
