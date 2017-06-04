@@ -11,35 +11,34 @@ public class memory extends DataSupport{
 
     private String name;
     private String date;
-    private int year;
-    private int month;
-    private int day;
+    private String loca;
+    private String year;
+    private String month;
+    private String day;
 
-    public int getYear() {
+    public String getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(String year) {
         this.year = year;
     }
 
-    public int getMonth() {
+    public String getMonth() {
         return month;
     }
 
-    public void setMonth(int month) {
+    public void setMonth(String month) {
         this.month = month;
     }
 
-    public int getDay() {
+    public String getDay() {
         return day;
     }
 
-    public void setDay(int day) {
+    public void setDay(String day) {
         this.day = day;
     }
-
-
 
     public String getName() {
         return name;
@@ -49,14 +48,14 @@ public class memory extends DataSupport{
         this.name = name;
     }
 
-    public String getDate() {
-
-        return date;
-    }
+    public String getDate() {return date;}
 
     public void setDate(String date) {
         this.date = date;
     }
 
+    public void setLoca(String loca)  {this.loca = loca; }
+
+    public String getLoca(){return loca;}
 
 }

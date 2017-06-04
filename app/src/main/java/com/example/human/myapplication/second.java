@@ -19,12 +19,14 @@ import android.graphics.Paint;
 import android.icu.util.Calendar;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Message;
 import android.os.PersistableBundle;
 import android.provider.ContactsContract;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -51,9 +53,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.map.BaiduMap;
 
 import org.litepal.crud.DataSupport;
 
@@ -70,29 +80,69 @@ import java.io.OutputStreamWriter;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 import java.util.zip.DataFormatException;
 
-public class second extends AppCompatActivity {
+public class second extends AppCompatActivity implements View.OnClickListener {
 
     private EditText edit;
     private int flag;
     private String name;
+    private boolean isloca = false;
     private static final int take = 1;
     private static final int find = 2;
     private static final int draw = 3;
+    private static final int UPDATE_TEXT = 4;
     private Uri imageUri;
+    public LocationClient mlocationClient;
+    public StringBuilder currentPosition;
+    public String time;
+    public String loca;
+    public TextView timeView;
+    public TextView locaView;
+
+    private android.os.Handler handler = new android.os.Handler(){
+        public void handleMessage(Message msg){
+            switch (msg.what){
+                case UPDATE_TEXT:
+                    locaView.setText("位置:"+currentPosition);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        timeView = (TextView) findViewById(R.id.time);
+        locaView = (TextView) findViewById(R.id.loc);
+        ImageButton button_photo = (ImageButton) findViewById(R.id.button_photo);
+        ImageButton button_gal = (ImageButton) findViewById(R.id.button_gal);
+        ImageButton button_draw = (ImageButton) findViewById(R.id.button_draw);
+        ImageButton button_loc = (ImageButton) findViewById(R.id.button_loc);
+        ImageButton button_share = (ImageButton) findViewById(R.id.button_share);
         setSupportActionBar(toolbar);
         flag=0;
         Intent intent = getIntent();
-       name = intent.getStringExtra("extra_data");
+        name = intent.getStringExtra("extra_data");
+        time = intent.getStringExtra("extra_time");
+        if(name!=null) {
+            memory m = DataSupport.where("name=?", name).findFirst(memory.class);
+            loca = m.getLoca();
+        }
+        if(loca!=null){
+            locaView.setText("位置："+loca);
+        }
         edit = (EditText) findViewById(R.id.editText2);
         String input;
         if(name==null){
@@ -100,6 +150,8 @@ public class second extends AppCompatActivity {
         }
         else{
             input= load(name);
+
+            timeView.setText("记于:"+time);
         }
         edit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -117,6 +169,55 @@ public class second extends AppCompatActivity {
                 flag=1;
             }
         });
+
+        button_photo.setOnClickListener(this);
+        button_gal.setOnClickListener(this);
+        button_draw.setOnClickListener(this);
+        button_loc.setOnClickListener(this);
+        button_share.setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.button_photo:
+                npicture();
+                break;
+            case R.id.button_gal:
+                if (ContextCompat.checkSelfPermission(second.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(second.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
+                }
+                else{
+                    open();
+                }
+                break;
+            case R.id.button_draw:
+                draw();
+                break;
+            case R.id.button_loc:
+                if(isloca)
+                    currentPosition.delete(0,currentPosition.length());
+                isloca = true;
+                location();
+                break;
+            case R.id.button_share:
+                String text[] = edit.getText().toString().split("\n");
+                String data="";
+                for(int i=0;i<text.length;i++){
+                    if(text[i].contains("/")){
+                    }
+                    else data=data+text[i];
+                }
+                Intent intent=new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Share");
+                intent.putExtra(Intent.EXTRA_TEXT, data+"\n"+"一来自随记");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(Intent.createChooser(intent, getTitle()));
+                break;
+            default:break;
+        }
     }
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
@@ -186,9 +287,15 @@ public class second extends AppCompatActivity {
                 }
                 break;
             case R.id.share:
+                String text[] = edit.getText().toString().split("\n");
+                String data="";
+                for(int i=0;i<text.length;i++){
+                    if(text[i].contains("/")){
+                    }
+                    else data=data+text[i];
+                }
                 Intent intent=new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                String data = edit.getText().toString();
                 intent.putExtra(Intent.EXTRA_SUBJECT, "Share");
                 intent.putExtra(Intent.EXTRA_TEXT, data+"\n"+"一来自随记");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -196,6 +303,12 @@ public class second extends AppCompatActivity {
                 break;
             case R.id.draw:
                 draw();
+                break;
+            case R.id.location:
+                if(isloca)
+                    currentPosition.delete(0,currentPosition.length());
+                isloca = true;
+                location();
                 break;
             default:
         }
@@ -230,6 +343,21 @@ public class second extends AppCompatActivity {
                 }
                 else{
                     Toast.makeText(this,"无法获取相册",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case 3:
+                if(grantResults.length>0){
+                    for(int result :grantResults){
+                        if(result != PackageManager.PERMISSION_GRANTED){
+                            Toast.makeText(this,"必须同意所有权限",Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+                    }
+                    requesLocation();
+                }else {
+                    Toast.makeText(this,"发生未知错误",Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
             default:
@@ -379,6 +507,7 @@ public class second extends AppCompatActivity {
                 take_photo();
         }
     }
+    //画图
     protected void draw(){
         Intent intent = new Intent(second.this,DrawActivity.class);
         startActivityForResult(intent,draw);
@@ -415,7 +544,10 @@ public class second extends AppCompatActivity {
             if(name.length()>7) {
                 name = name.substring(0, 7);
             }
-
+            List<memory> check = DataSupport.where("name=?",name).find(memory.class);
+            if(!(check.isEmpty())){
+                DataSupport.deleteAll(memory.class,"name=?",name);
+            }
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
             String  fuck =df.format(new Date());// new Date()为获取当前系统时间
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -427,16 +559,21 @@ public class second extends AppCompatActivity {
             }
             int year = date.getYear()+1900;
             int month= date.getMonth()+1;
-            int day  = date.getDay()+2;
+            int day  = date.getDay()-3;
             System.out.println(year+" "+month+" "+day);
 
             memory m=new memory();
+            if(isloca)
+                m.setLoca(currentPosition.toString());
+            else
+                m.setLoca("不知何地");
             m.setName(name);
             m.setDate(fuck);
-            m.setYear(year);
-            m.setMonth(month);
-            m.setDay(day);
+            m.setYear(year+"");
+            m.setMonth(month+"");
+            m.setDay(day+"");
             m.save();
+            Log.d("second", year+""+month+""+day+"");
 
             FileOutputStream out = null;
             BufferedWriter writer= null;
@@ -461,7 +598,6 @@ public class second extends AppCompatActivity {
         Intent intent = new Intent(second.this,MainActivity.class);
         startActivity(intent);
     }
-
     //读取之前存储的文本
     public String load(String name){
         FileInputStream in = null;
@@ -507,5 +643,70 @@ public class second extends AppCompatActivity {
             }
         }
         return content.toString();
+    }
+    //定位
+    private void location(){
+
+        mlocationClient = new LocationClient(getApplicationContext());
+        mlocationClient.registerLocationListener(new MyLocationListener());
+
+        List<String> permissionList = new ArrayList<>();
+        if(ContextCompat.checkSelfPermission(second.this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+            permissionList.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if(ContextCompat.checkSelfPermission(second.this, android.Manifest.permission.READ_PHONE_STATE)!=PackageManager.PERMISSION_GRANTED){
+            permissionList.add(android.Manifest.permission.READ_PHONE_STATE);
+        }
+        if(ContextCompat.checkSelfPermission(second.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
+            permissionList.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if(!permissionList.isEmpty()){
+            String [ ] permissions = permissionList.toArray(new String[permissionList.size()]);
+            ActivityCompat.requestPermissions(second.this,permissions,3);
+        }else {
+            requesLocation();
+        }
+    }
+
+    private void requesLocation(){
+        initLocation();
+        mlocationClient.start();
+    }
+
+    private void initLocation(){
+        LocationClientOption option = new LocationClientOption();
+        option.setScanSpan(5000);
+        option.setIsNeedAddress(true);
+        mlocationClient.setLocOption(option);
+    }
+
+
+
+    public class MyLocationListener implements BDLocationListener{
+
+        @Override
+        public void onReceiveLocation(BDLocation bdLocation) {
+            currentPosition = new StringBuilder();
+            currentPosition.append(bdLocation.getCountry()).append(".");
+            currentPosition.append(bdLocation.getProvince()).append(".");
+            currentPosition.append(bdLocation.getCity()).append(".");
+            currentPosition.append(bdLocation.getDistrict()).append(".");
+            currentPosition.append(bdLocation.getStreet());
+            Message message = new Message();
+            message.what = UPDATE_TEXT;
+            handler.sendMessage(message);
+        }
+
+        @Override
+        public void onConnectHotSpotMessage(String s, int i) {
+
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(isloca)
+         mlocationClient.stop();
     }
 }

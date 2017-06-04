@@ -42,6 +42,7 @@ public class madapter extends ArrayAdapter<summary> {
         CheckBox select= (CheckBox) view.findViewById(R.id.list_select);
         TextView name = (TextView) view.findViewById(R.id.text_name);
         TextView date = (TextView) view.findViewById(R.id.text_date);
+        TextView loca = (TextView) view.findViewById(R.id.text_loca);
         select.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
 
             @Override
@@ -64,6 +65,10 @@ public class madapter extends ArrayAdapter<summary> {
         }
         name.setText(s.getName());
         date.setText(s.getDate());
+        if(s.getLoca()!=null){
+            loca.setText(s.getLoca());
+
+        }
         return view;
     }
 }

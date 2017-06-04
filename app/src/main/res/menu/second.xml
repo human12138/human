@@ -31,5 +31,9 @@
         android:title="画板"
         app:showAsAction="ifRoom"
         ></item>
+    <item
+        android:id="@+id/location"
+        android:title="定位"
+        ></item>
 
 </menu>
